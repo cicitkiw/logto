@@ -12,10 +12,10 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "copy:apidocs": "rsync -a -m --include '*/' --include '*.openapi.json' --exclude '*' src/routes/ build/routes/",
+    "copy:apidocs": "node copy-apidocs.js",
     "check": "tsc --noEmit",
     "build": "tsup",
-    "build:test": "rm -rf build/ && tsc -p tsconfig.test.json --sourcemap && pnpm run copy:apidocs",
+    "build:test": "rimraf build/ && tsc -p tsconfig.test.json --sourcemap && pnpm run copy:apidocs",
     "lint": "eslint --ext .ts --ext .json src",
     "lint:report": "pnpm lint --format json --output-file report.json",
     "dev": "tsup --config tsup.dev.config.ts",
@@ -135,7 +135,9 @@
     "sinon": "^19.0.0",
     "supertest": "^7.0.0",
     "tsup": "^8.3.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "fs-extra": "^11.3.0",
+    "glob": "^11.0.1"
   },
   "engines": {
     "node": "^20.9.0"
