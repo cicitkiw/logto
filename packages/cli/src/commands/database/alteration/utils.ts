@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -72,7 +73,15 @@ export const getAlterationFiles = async (): Promise<AlterationFile[]> => {
   return files
     .slice()
     .sort((file1, file2) => getTimestampFromFilename(file1) - getTimestampFromFilename(file2))
-    .map((filename) => ({ path: path.join(localAlterationDirectory, filename), filename }));
+    .map((filename) => {
+      let localAlterationPath = path.join(localAlterationDirectory, filename);
+      const platform = os.platform();
+      if (platform === 'win32') {
+          const windowsLocalAlterationUrl = new URL('file://' + localAlterationPath.replace(/\\/g, '/'))
+          localAlterationPath = windowsLocalAlterationUrl.href;
+      }
+      return { path: localAlterationPath, filename }
+  });
 };
 
 export const chooseRevertAlterationsByTimestamp = async (target: string) => {
