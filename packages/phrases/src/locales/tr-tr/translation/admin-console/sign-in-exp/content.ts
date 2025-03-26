@@ -1,6 +1,7 @@
 const content = {
   terms_of_use: {
     title: 'TERMS',
+    description: 'Uyumluluk gereksinimlerini karşılamak için Şartlar ve Gizlilik ekleyin.',
     terms_of_use: 'Terms of use URL',
     terms_of_use_placeholder: 'https://your.terms.of.use/',
     privacy_policy: 'Privacy policy URL',
@@ -25,17 +26,11 @@ const content = {
       'When auto-detect is off, the default language is the only language your software will show. Turn on auto-detect for language extension.',
   },
   support: {
-    /** UNTRANSLATED */
-    title: 'SUPPORT',
-    /** UNTRANSLATED */
-    subtitle: 'Display your support channels on error pages for quick user assistance.',
-    /** UNTRANSLATED */
-    support_email: 'Support email',
-    /** UNTRANSLATED */
+    title: 'DESTEK',
+    subtitle: 'Hızlı kullanıcı yardımı için hata sayfalarında destek kanallarınızı gösterin.',
+    support_email: 'Destek e-posta',
     support_email_placeholder: 'support@email.com',
-    /** UNTRANSLATED */
-    support_website: 'Support website',
-    /** UNTRANSLATED */
+    support_website: 'Destek web sitesi',
     support_website_placeholder: 'https://your.website/support',
   },
   manage_language: {

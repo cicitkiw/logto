@@ -1,6 +1,7 @@
 const content = {
   terms_of_use: {
     title: 'TERMS',
+    description: 'Добавьте условия и политику конфиденциальности для соблюдения требований.',
     terms_of_use: 'Terms of use URL',
     terms_of_use_placeholder: 'https://your.terms.of.use/',
     privacy_policy: 'Privacy policy URL',
@@ -25,17 +26,12 @@ const content = {
       'When auto-detect is off, the default language is the only language your software will show. Turn on auto-detect for language extension.',
   },
   support: {
-    /** UNTRANSLATED */
-    title: 'SUPPORT',
-    /** UNTRANSLATED */
-    subtitle: 'Display your support channels on error pages for quick user assistance.',
-    /** UNTRANSLATED */
-    support_email: 'Support email',
-    /** UNTRANSLATED */
+    title: 'ПОДДЕРЖКА',
+    subtitle:
+      'Отображайте ваши каналы поддержки на страницах ошибок для быстрой помощи пользователям.',
+    support_email: 'Электронная почта поддержки',
     support_email_placeholder: 'support@email.com',
-    /** UNTRANSLATED */
-    support_website: 'Support website',
-    /** UNTRANSLATED */
+    support_website: 'Сайт поддержки',
     support_website_placeholder: 'https://your.website/support',
   },
   manage_language: {

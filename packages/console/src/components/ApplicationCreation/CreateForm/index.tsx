@@ -7,16 +7,21 @@ import { useController, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import Modal from 'react-modal';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 
 import { GtagConversionId, reportConversion } from '@/components/Conversion/utils';
+import LearnMore from '@/components/LearnMore';
+import { pricingLink, defaultPageSize, integrateLogto } from '@/consts';
+import { isCloud } from '@/consts/env';
 import { latestProPlanId } from '@/consts/subscriptions';
 import { SubscriptionDataContext } from '@/contexts/SubscriptionDataProvider';
+import { LinkButton } from '@/ds-components/Button';
 import DynamicT from '@/ds-components/DynamicT';
 import FormField from '@/ds-components/FormField';
 import ModalLayout from '@/ds-components/ModalLayout';
 import RadioGroup, { Radio } from '@/ds-components/RadioGroup';
 import TextInput from '@/ds-components/TextInput';
+import { type RequestError } from '@/hooks/use-api';
 import useApi from '@/hooks/use-api';
 import useApplicationsUsage from '@/hooks/use-applications-usage';
 import useCurrentUser from '@/hooks/use-current-user';
@@ -25,9 +30,13 @@ import modalStyles from '@/scss/modal.module.scss';
 import { applicationTypeI18nKey } from '@/types/applications';
 import { trySubmitSafe } from '@/utils/form';
 import { isPaidPlan } from '@/utils/subscription';
+import { buildUrl } from '@/utils/url';
 
 import Footer from './Footer';
 import styles from './index.module.scss';
+
+const applicationsEndpoint = 'api/applications';
+const samlApplicationsLimit = 3;
 
 type AvailableApplicationTypeForCreation = Extract<
   ApplicationType,
@@ -66,6 +75,19 @@ function CreateForm({
   } = useForm<FormData>({
     defaultValues: { type: defaultCreateType, isThirdParty: isDefaultCreateThirdParty },
   });
+
+  const { data } = useSWR<[Application[], number], RequestError>(
+    !isCloud &&
+      defaultCreateType === ApplicationType.SAML &&
+      buildUrl(applicationsEndpoint, {
+        page: String(1),
+        page_size: String(defaultPageSize),
+        isThirdParty: 'false',
+        type: ApplicationType.SAML,
+      })
+  );
+  const [_, samlAppTotalCount] = data ?? [];
+
   const {
     currentSubscription: { planId, isEnterprisePlan },
   } = useContext(SubscriptionDataContext);
@@ -110,7 +132,12 @@ function CreateForm({
 
   const subtitleElement = useMemo<AdminConsoleKey | ReactElement>(() => {
     if (!defaultCreateFrameworkName) {
-      return 'applications.subtitle';
+      return (
+        <>
+          <DynamicT forKey="applications.subtitle" />
+          <LearnMore isRelativeDocUrl href={integrateLogto} />
+        </>
+      );
     }
 
     if (isDefaultCreateThirdParty) {
@@ -148,12 +175,28 @@ function CreateForm({
         }
         size={defaultCreateType ? 'medium' : 'large'}
         footer={
-          <Footer
-            selectedType={value}
-            isLoading={isSubmitting}
-            isThirdParty={isDefaultCreateThirdParty}
-            onClickCreate={onSubmit}
-          />
+          !isCloud &&
+          defaultCreateType === ApplicationType.SAML &&
+          typeof samlAppTotalCount === 'number' &&
+          samlAppTotalCount >= samlApplicationsLimit ? (
+            <div className={styles.container}>
+              <div className={styles.description}>{t('upsell.paywall.saml_applications_oss')}</div>
+              <LinkButton
+                size="large"
+                type="primary"
+                title="upsell.paywall.logto_pricing_button_text"
+                href={pricingLink}
+                targetBlank="noopener"
+              />
+            </div>
+          ) : (
+            <Footer
+              selectedType={value}
+              isLoading={isSubmitting}
+              isThirdParty={isDefaultCreateThirdParty}
+              onClickCreate={onSubmit}
+            />
+          )
         }
         onClose={onClose}
       >

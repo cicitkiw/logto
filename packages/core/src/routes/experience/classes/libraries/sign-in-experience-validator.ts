@@ -1,4 +1,5 @@
 import {
+  AlternativeSignUpIdentifier,
   InteractionEvent,
   MissingProfile,
   type SignInExperience,
@@ -7,6 +8,7 @@ import {
   VerificationType,
 } from '@logto/schemas';
 
+import { EnvSet } from '#src/env-set/index.js';
 import RequestError from '#src/errors/RequestError/index.js';
 import type Libraries from '#src/tenants/Libraries.js';
 import type Queries from '#src/tenants/Queries.js';
@@ -32,6 +34,36 @@ const getEmailIdentifierFromVerificationRecord = (verificationRecord: Verificati
     default: {
       break;
     }
+  }
+};
+
+/**
+ * @remarks
+ * In our legacy `signUp.identifiers` field design, a list of {@link SignInIdentifier} is accepted.
+ *
+ * `signUp.identifiers` represents the primary identifier for the user to sign up.
+ * If more than one identifier is provided, the user can choose one of them to sign up.
+ * The supported case suppose to be `['email', 'phone']`. In this case, the user can sign up with either email or phone.
+ * However, the current implementation does not provide a safe guard for invalid cases like `['email', 'username']`.
+ * Use this function to safely parse the mandatory primary identifier. Always early return if the primary identifier is found.
+ */
+const parseMandatoryPrimaryIdentifier = (
+  identifiers: SignInIdentifier[]
+): MissingProfile | undefined => {
+  const identifiersSet = new Set(identifiers);
+
+  if (identifiersSet.has(SignInIdentifier.Username)) {
+    return MissingProfile.username;
+  }
+
+  if (identifiersSet.has(SignInIdentifier.Email)) {
+    return identifiersSet.has(SignInIdentifier.Phone)
+      ? MissingProfile.emailOrPhone
+      : MissingProfile.email;
+  }
+
+  if (identifiersSet.has(SignInIdentifier.Phone)) {
+    return MissingProfile.phone;
   }
 };
 
@@ -130,32 +162,45 @@ export class SignInExperienceValidator {
 
   public async getMandatoryUserProfileBySignUpMethods(): Promise<Set<MissingProfile>> {
     const {
-      signUp: { identifiers, password },
+      signUp: { identifiers, password, secondaryIdentifiers = [] },
     } = await this.getSignInExperienceData();
+
     const mandatoryUserProfile = new Set<MissingProfile>();
 
+    // Check for mandatory primary identifier
+    const mandatoryPrimaryIdentifier = parseMandatoryPrimaryIdentifier(identifiers);
+    if (mandatoryPrimaryIdentifier) {
+      mandatoryUserProfile.add(mandatoryPrimaryIdentifier);
+    }
+
+    // TODO: Remove this dev feature check
+    // Check for mandatory secondary identifiers
+    if (EnvSet.values.isDevFeaturesEnabled) {
+      for (const { identifier } of secondaryIdentifiers) {
+        switch (identifier) {
+          case SignInIdentifier.Email: {
+            mandatoryUserProfile.add(MissingProfile.email);
+            continue;
+          }
+          case SignInIdentifier.Phone: {
+            mandatoryUserProfile.add(MissingProfile.phone);
+            continue;
+          }
+          case SignInIdentifier.Username: {
+            mandatoryUserProfile.add(MissingProfile.username);
+            continue;
+          }
+          case AlternativeSignUpIdentifier.EmailOrPhone: {
+            mandatoryUserProfile.add(MissingProfile.emailOrPhone);
+            continue;
+          }
+        }
+      }
+    }
+
+    // Check for mandatory password
     if (password) {
       mandatoryUserProfile.add(MissingProfile.password);
-    }
-
-    if (identifiers.includes(SignInIdentifier.Username)) {
-      mandatoryUserProfile.add(MissingProfile.username);
-    }
-
-    if (
-      identifiers.includes(SignInIdentifier.Email) &&
-      identifiers.includes(SignInIdentifier.Phone)
-    ) {
-      mandatoryUserProfile.add(MissingProfile.emailOrPhone);
-      return mandatoryUserProfile;
-    }
-
-    if (identifiers.includes(SignInIdentifier.Email)) {
-      mandatoryUserProfile.add(MissingProfile.email);
-    }
-
-    if (identifiers.includes(SignInIdentifier.Phone)) {
-      mandatoryUserProfile.add(MissingProfile.phone);
     }
 
     return mandatoryUserProfile;
@@ -191,6 +236,32 @@ export class SignInExperienceValidator {
         }
       )
     );
+  }
+
+  /**
+   * Guard the captcha required based on the captcha policy.
+   * Only call this method if captcha is not verified.
+   *
+   * @param event The interaction event.
+   *
+   * @throws {RequestError} with 422 if the captcha is required
+   */
+  public async guardCaptcha(event: InteractionEvent) {
+    const { captchaPolicy } = await this.getSignInExperienceData();
+
+    if (event === InteractionEvent.SignIn && !captchaPolicy.signIn) {
+      return;
+    }
+
+    if (event === InteractionEvent.Register && !captchaPolicy.signUp) {
+      return;
+    }
+
+    if (event === InteractionEvent.ForgotPassword && !captchaPolicy.forgotPassword) {
+      return;
+    }
+
+    throw new RequestError({ code: 'session.captcha_required', status: 422 });
   }
 
   /**
@@ -230,6 +301,16 @@ export class SignInExperienceValidator {
       case VerificationType.EnterpriseSso: {
         assertThat(
           singleSignOnEnabled,
+          new RequestError({ code: 'user.sign_in_method_not_enabled', status: 422 })
+        );
+        break;
+      }
+      case VerificationType.OneTimeToken: {
+        const {
+          identifier: { type },
+        } = verificationRecord;
+        assertThat(
+          signInMethods.some(({ identifier }) => type === identifier),
           new RequestError({ code: 'user.sign_in_method_not_enabled', status: 422 })
         );
         break;

@@ -56,25 +56,23 @@ export const fetchOidcConfig = async (
   }
 };
 
+type HandleTokenExchangePayload = {
+  code: string;
+  clientId: string;
+  clientSecret: string;
+  redirectUri?: string;
+};
+
 export const handleTokenExchange = async (
   tokenEndpoint: string,
-  {
-    code,
-    clientId,
-    clientSecret,
-    redirectUri,
-  }: {
-    code: string;
-    clientId: string;
-    clientSecret: string;
-    redirectUri?: string;
-  }
+  { code, clientId, clientSecret, redirectUri }: HandleTokenExchangePayload
 ) => {
   const tokenRequestParameters = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
-    client_id: clientId,
     ...(redirectUri ? { redirect_uri: redirectUri } : {}),
+    // No need to pass `client_id` and `client_secret` as it is already in the Authorization header
+    // For some providers like Okta, passing `client_id` in the body while using client credentials authorization header will cause an error
   });
 
   const headers = {
@@ -165,7 +163,7 @@ export const getIdTokenClaims = async (
       });
     }
 
-    const result = idTokenProfileStandardClaimsGuard.safeParse(payload);
+    const result = idTokenProfileStandardClaimsGuard.catchall(z.unknown()).safeParse(payload);
 
     if (!result.success) {
       throw new SsoConnectorError(SsoConnectorErrorCodes.AuthorizationFailed, {

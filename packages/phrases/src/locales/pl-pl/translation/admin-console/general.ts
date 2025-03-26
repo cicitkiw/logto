@@ -13,8 +13,7 @@ const general = {
   save_changes: 'Zapisz zmiany',
   saved: 'Zapisane',
   discard: 'Porzuć',
-  /** UNTRANSLATED */
-  download: 'Download',
+  download: 'Pobierz',
   loading: 'Trwa ładowanie...',
   redirecting: 'Przekierowywanie...',
   add: 'Dodaj',
@@ -30,10 +29,8 @@ const general = {
   edit: 'Edytuj',
   delete: 'Usuń',
   deleted: 'Usunięto',
-  /** UNTRANSLATED */
-  activate: 'Activate',
-  /** UNTRANSLATED */
-  deactivate: 'Deactivate',
+  activate: 'Aktywuj',
+  deactivate: 'Dezaktywuj',
   more_options: 'WIĘCEJ OPCJI',
   close: 'Zamknij',
   copy: 'Kopiuj',
@@ -52,7 +49,7 @@ const general = {
   continue: 'Kontynuuj',
   page_info: '{{min, number}}-{{max, number}} z {{total, number}}',
   learn_more: 'Dowiedz się więcej',
-  tab_error_one: '{{count, number}} błąd',
+  tab_error: '{{count, number}} błąd',
   tab_error_other: '{{count, number}} błędów',
   skip_for_now: 'Pomiń na teraz',
   remove: 'Usuń',

@@ -23,6 +23,7 @@ const application_details = {
   description_placeholder: 'Enter your application description',
   config_endpoint: 'OpenID provider configuration endpoint',
   issuer_endpoint: 'Issuer endpoint',
+  jwks_uri: 'JWKS URI',
   authorization_endpoint: 'Authorization endpoint',
   authorization_endpoint_tip:
     "The endpoint to perform authentication and authorization. It's used for OpenID Connect <a>Authentication</a>.",
@@ -95,6 +96,8 @@ const application_details = {
   protect_origin_server: 'Protect your origin server',
   protect_origin_server_description:
     'Ensure to protect your origin server from direct access. Refer to the guide for more <a>detailed instructions</a>.',
+  third_party_settings_description:
+    'Integrate third-party applications with Logto as your Identity Provider (IdP) using OIDC / OAuth 2.0, featuring a consent screen for user authorization.',
   session_duration: 'Session duration (days)',
   try_it: 'Try it',
   no_organization_placeholder: 'No organization found. <a>Go to organizations</a>',

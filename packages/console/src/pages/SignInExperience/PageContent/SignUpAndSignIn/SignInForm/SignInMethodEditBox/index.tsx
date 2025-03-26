@@ -1,15 +1,21 @@
-import { SignInIdentifier } from '@logto/schemas';
+import { AlternativeSignUpIdentifier, SignInIdentifier } from '@logto/schemas';
 import { conditional } from '@silverhand/essentials';
+import { useCallback } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { isDevFeaturesEnabled } from '@/consts/env';
 import { DragDropProvider, DraggableItem } from '@/ds-components/DragDrop';
 import useEnabledConnectorTypes from '@/hooks/use-enabled-connector-types';
 
 import type { SignInExperienceForm } from '../../../../types';
 import { signInIdentifiers, signUpIdentifiersMapping } from '../../../constants';
 import { identifierRequiredConnectorMapping } from '../../constants';
-import { getSignUpRequiredConnectorTypes, createSignInMethod } from '../../utils';
+import {
+  getSignUpRequiredConnectorTypes,
+  createSignInMethod,
+  getSignUpIdentifiersRequiredConnectors,
+} from '../../utils';
 
 import AddButton from './AddButton';
 import SignInMethodItem from './SignInMethodItem';
@@ -43,15 +49,47 @@ function SignInMethodEditBox() {
 
   const {
     identifier: signUpIdentifier,
+    identifiers,
     password: isSignUpPasswordRequired,
     verify: isSignUpVerificationRequired,
   } = signUp;
 
   const requiredSignInIdentifiers = signUpIdentifiersMapping[signUpIdentifier];
-  const ignoredWarningConnectors = getSignUpRequiredConnectorTypes(signUpIdentifier);
+  const signUpIdentifiers = identifiers.map(({ identifier }) => identifier);
+
+  // TODO: Remove this dev feature guard when multi sign-up identifiers are launched
+  const ignoredWarningConnectors = isDevFeaturesEnabled
+    ? getSignUpIdentifiersRequiredConnectors(signUpIdentifiers)
+    : getSignUpRequiredConnectorTypes(signUpIdentifier);
 
   const signInIdentifierOptions = signInIdentifiers.filter((candidateIdentifier) =>
     fields.every(({ identifier }) => identifier !== candidateIdentifier)
+  );
+
+  const isVerificationCodeCheckable = useCallback(
+    (identifier: SignInIdentifier) => {
+      if (identifier === SignInIdentifier.Username) {
+        return false;
+      }
+
+      if (isSignUpPasswordRequired) {
+        return true;
+      }
+
+      if (!isDevFeaturesEnabled) {
+        return !isSignUpVerificationRequired;
+      }
+
+      // If the sign-in identifier is also enabled for sign-up.
+      const signUpVerificationRequired = signUpIdentifiers.some(
+        (signUpIdentifier) =>
+          signUpIdentifier === identifier ||
+          signUpIdentifier === AlternativeSignUpIdentifier.EmailOrPhone
+      );
+
+      return !signUpVerificationRequired;
+    },
+    [isSignUpPasswordRequired, isSignUpVerificationRequired, signUpIdentifiers]
   );
 
   return (
@@ -103,12 +141,13 @@ function SignInMethodEditBox() {
                   <SignInMethodItem
                     signInMethod={value}
                     isPasswordCheckable={
-                      identifier !== SignInIdentifier.Username && !isSignUpPasswordRequired
+                      identifier !== SignInIdentifier.Username &&
+                      (isDevFeaturesEnabled || !isSignUpPasswordRequired)
                     }
-                    isVerificationCodeCheckable={
-                      !(isSignUpVerificationRequired && !isSignUpPasswordRequired)
+                    isVerificationCodeCheckable={isVerificationCodeCheckable(value.identifier)}
+                    isDeletable={
+                      isDevFeaturesEnabled || !requiredSignInIdentifiers.includes(identifier)
                     }
-                    isDeletable={!requiredSignInIdentifiers.includes(identifier)}
                     requiredConnectors={requiredConnectors}
                     hasError={Boolean(error)}
                     errorMessage={error?.message}

@@ -13,7 +13,12 @@ import { z } from 'zod';
 import { type WithLogContext } from '#src/middleware/koa-audit-log.js';
 import { type WithInteractionDetailsContext } from '#src/middleware/koa-interaction-details.js';
 
-import { type VerificationRecordMap } from './classes/verifications/index.js';
+import { type WithI18nContext } from '../../middleware/koa-i18next.js';
+
+import {
+  type VerificationRecord,
+  type VerificationRecordMap,
+} from './classes/verifications/index.js';
 import { type WithExperienceInteractionHooksContext } from './middleware/koa-experience-interaction-hooks.js';
 import { type WithExperienceInteractionContext } from './middleware/koa-experience-interaction.js';
 
@@ -81,6 +86,7 @@ export const interactionProfileGuard = Users.createGuard
 export type InteractionContext = {
   getInteractionEvent: () => InteractionEvent;
   getIdentifiedUser: () => Promise<User>;
+  getVerificationRecordById: (verificationId: string) => VerificationRecord;
   getVerificationRecordByTypeAndId: <K extends keyof VerificationRecordMap>(
     type: K,
     verificationId: string
@@ -89,6 +95,7 @@ export type InteractionContext = {
 
 export type ExperienceInteractionRouterContext<ContextT extends WithLogContext = WithLogContext> =
   ContextT &
+    WithI18nContext &
     WithInteractionDetailsContext &
     WithExperienceInteractionHooksContext &
     WithExperienceInteractionContext;

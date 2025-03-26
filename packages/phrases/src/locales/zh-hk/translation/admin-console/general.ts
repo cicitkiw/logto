@@ -13,8 +13,7 @@ const general = {
   save_changes: '儲存變更',
   saved: '已儲存',
   discard: '放棄',
-  /** UNTRANSLATED */
-  download: 'Download',
+  download: '下載',
   loading: '讀取中...',
   redirecting: '頁面跳轉中...',
   add: '添加',
@@ -30,10 +29,8 @@ const general = {
   edit: '編輯',
   delete: '刪除',
   deleted: '已刪除',
-  /** UNTRANSLATED */
-  activate: 'Activate',
-  /** UNTRANSLATED */
-  deactivate: 'Deactivate',
+  activate: '啟動',
+  deactivate: '停用',
   more_options: '更多選項',
   close: '關閉',
   copy: '複製',
@@ -52,7 +49,7 @@ const general = {
   continue: '繼續',
   page_info: '{{min, number}}-{{max, number}} 共 {{total, number}} 條',
   learn_more: '了解更多',
-  tab_error_one: '{{count, number}} 個錯誤',
+  tab_error: '{{count, number}} 個錯誤',
   tab_error_other: '{{count, number}} 個錯誤',
   skip_for_now: '先跳過',
   remove: '移除',

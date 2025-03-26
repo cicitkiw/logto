@@ -14,6 +14,7 @@ import { createHooksQueries } from '#src/queries/hooks.js';
 import { createLogQueries } from '#src/queries/log.js';
 import { createLogtoConfigQueries } from '#src/queries/logto-config.js';
 import { createOidcModelInstanceQueries } from '#src/queries/oidc-model-instance.js';
+import { createOneTimeTokenQueries } from '#src/queries/one-time-tokens.js';
 import OrganizationQueries from '#src/queries/organization/index.js';
 import { createPasscodeQueries } from '#src/queries/passcode.js';
 import { createResourceQueries } from '#src/queries/resource.js';
@@ -34,6 +35,8 @@ import { createUsersRolesQueries } from '#src/queries/users-roles.js';
 import { createVerificationStatusQueries } from '#src/queries/verification-status.js';
 
 import { AccountCenterQueries } from '../queries/account-center.js';
+import { CaptchaProviderQueries } from '../queries/captcha-providers.js';
+import EmailTemplatesQueries from '../queries/email-templates.js';
 import { PersonalAccessTokensQueries } from '../queries/personal-access-tokens.js';
 import { VerificationRecordQueries } from '../queries/verification-records.js';
 
@@ -57,6 +60,7 @@ export default class Queries {
   applicationsRoles = createApplicationsRolesQueries(this.pool);
   verificationStatuses = createVerificationStatusQueries(this.pool);
   hooks = createHooksQueries(this.pool);
+  oneTimeTokens = createOneTimeTokenQueries(this.pool);
   domains = createDomainsQueries(this.pool);
   dailyActiveUsers = createDailyActiveUsersQueries(this.pool);
   dailyTokenUsage = createDailyTokenUsageQueries(this.pool);
@@ -72,6 +76,8 @@ export default class Queries {
   verificationRecords = new VerificationRecordQueries(this.pool);
   accountCenters = new AccountCenterQueries(this.pool);
   tenants = createTenantQueries(this.pool);
+  emailTemplates = new EmailTemplatesQueries(this.pool, this.wellKnownCache);
+  captchaProviders = new CaptchaProviderQueries(this.pool);
 
   constructor(
     public readonly pool: CommonQueryMethods,

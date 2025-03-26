@@ -26,15 +26,18 @@ import applicationUserConsentOrganizationRoutes from './applications/application
 import applicationUserConsentScopeRoutes from './applications/application-user-consent-scope.js';
 import applicationRoutes from './applications/application.js';
 import authnRoutes from './authn.js';
+import captchaProviderRoutes from './captcha-provider/index.js';
 import connectorRoutes from './connector/index.js';
 import customPhraseRoutes from './custom-phrase.js';
 import dashboardRoutes from './dashboard.js';
 import domainRoutes from './domain.js';
+import emailTemplateRoutes from './email-template/index.js';
 import experienceApiRoutes from './experience/index.js';
 import hookRoutes from './hook.js';
 import interactionRoutes from './interaction/index.js';
 import logRoutes from './log.js';
 import logtoConfigRoutes from './logto-config/index.js';
+import oneTimeTokenRoutes from './one-time-tokens.js';
 import organizationRoutes from './organization/index.js';
 import resourceRoutes from './resource.js';
 import resourceScopeRoutes from './resource.scope.js';
@@ -101,8 +104,11 @@ const createRouters = (tenant: TenantContext) => {
   systemRoutes(managementRouter, tenant);
   subjectTokenRoutes(managementRouter, tenant);
   accountCentersRoutes(managementRouter, tenant);
-  if (EnvSet.values.isCloud || EnvSet.values.isIntegrationTest) {
-    samlApplicationRoutes(managementRouter, tenant);
+  samlApplicationRoutes(managementRouter, tenant);
+  emailTemplateRoutes(managementRouter, tenant);
+  if (EnvSet.values.isDevFeaturesEnabled) {
+    oneTimeTokenRoutes(managementRouter, tenant);
+    captchaProviderRoutes(managementRouter, tenant);
   }
 
   const anonymousRouter: AnonymousRouter = new Router();
@@ -117,9 +123,7 @@ const createRouters = (tenant: TenantContext) => {
   wellKnownRoutes(anonymousRouter, tenant);
   statusRoutes(anonymousRouter, tenant);
   authnRoutes(anonymousRouter, tenant);
-  if (EnvSet.values.isCloud || EnvSet.values.isIntegrationTest) {
-    samlApplicationAnonymousRoutes(anonymousRouter, tenant);
-  }
+  samlApplicationAnonymousRoutes(anonymousRouter, tenant);
 
   wellKnownOpenApiRoutes(anonymousRouter, {
     experienceRouters: [experienceRouter, interactionRouter],

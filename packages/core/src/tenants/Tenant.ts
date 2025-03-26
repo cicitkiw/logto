@@ -85,15 +85,21 @@ export default class Tenant implements TenantContext {
     public readonly logtoConfigs = createLogtoConfigLibrary(queries),
     public readonly cloudConnection = createCloudConnectionLibrary(logtoConfigs),
     public readonly connectors = createConnectorLibrary(queries, cloudConnection),
+    public readonly subscription = new SubscriptionLibrary(
+      id,
+      queries,
+      cloudConnection,
+      redisCache
+    ),
     public readonly libraries = new Libraries(
       id,
       queries,
       connectors,
       cloudConnection,
-      logtoConfigs
+      logtoConfigs,
+      subscription
     ),
-    public readonly sentinel = new BasicSentinel(envSet.pool),
-    public readonly subscription = new SubscriptionLibrary(id, queries, cloudConnection, redisCache)
+    public readonly sentinel = new BasicSentinel(envSet.pool)
   ) {
     const isAdminTenant = id === adminTenantId;
     const mountedApps = [
@@ -106,11 +112,11 @@ export default class Tenant implements TenantContext {
     // Init app
     const app = new Koa();
 
+    app.use(koaI18next());
     app.use(koaErrorHandler());
     app.use(koaOidcErrorHandler());
     app.use(koaSlonikErrorHandler());
     app.use(koaConnectorErrorHandler());
-    app.use(koaI18next());
     app.use(koaCompress());
     app.use(koaSecurityHeaders(mountedApps, id));
 

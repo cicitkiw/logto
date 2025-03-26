@@ -13,8 +13,7 @@ const general = {
   save_changes: 'Сохранить изменения',
   saved: 'Сохранено',
   discard: 'Отказаться',
-  /** UNTRANSLATED */
-  download: 'Download',
+  download: 'Скачать',
   loading: 'Загрузка...',
   redirecting: 'Перенаправление...',
   add: 'Добавить',
@@ -30,10 +29,8 @@ const general = {
   edit: 'Редактировать',
   delete: 'Удалить',
   deleted: 'Удалено',
-  /** UNTRANSLATED */
-  activate: 'Activate',
-  /** UNTRANSLATED */
-  deactivate: 'Deactivate',
+  activate: 'Активировать',
+  deactivate: 'Деактивировать',
   more_options: 'Дополнительные опции',
   close: 'Закрыть',
   copy: 'Копировать',
@@ -52,7 +49,7 @@ const general = {
   continue: 'Продолжить',
   page_info: '{{min, number}}-{{max, number}} из {{total, number}}',
   learn_more: 'Узнать больше',
-  tab_error_one: '{{count, number}} ошибка',
+  tab_error: '{{count, number}} ошибка',
   tab_error_other: '{{count, number}} ошибок',
   skip_for_now: 'Пропустить',
   remove: 'Удалить',

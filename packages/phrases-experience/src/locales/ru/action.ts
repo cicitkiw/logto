@@ -29,10 +29,9 @@ const action = {
   verify_via_passkey: 'Проверить с помощью ключа доступа',
   download: 'Скачать',
   single_sign_on: 'Единый вход',
-  /** UNTRANSLATED */
-  authorize: 'Authorize',
-  /** UNTRANSLATED */
-  use_another_account: 'Use another account',
+  authorize: 'Авторизовать',
+  use_another_account: 'Использовать другой аккаунт',
+  back_to_current_account: 'Назад к текущему аккаунту',
 };
 
 export default Object.freeze(action);

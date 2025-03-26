@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.1.2
+
+### Patch Changes
+
+- 59f6b8eda: update supported language list for better compatibility
+
+## 1.1.1
+
+### Patch Changes
+
+- e11e57de8: bump dependencies for security update
+
 ## 1.1.0
 
 ### Minor Changes

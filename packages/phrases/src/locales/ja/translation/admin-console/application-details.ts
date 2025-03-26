@@ -24,6 +24,7 @@ const application_details = {
   description_placeholder: 'アプリケーションの説明を入力してください',
   config_endpoint: 'OpenID プロバイダ構成エンドポイント',
   issuer_endpoint: '発行者エンドポイント',
+  jwks_uri: 'JWKS URI',
   authorization_endpoint: '認可エンドポイント',
   authorization_endpoint_tip:
     '認証と認可を実行するエンドポイントです。OpenID Connect の<a>認証</a>に使用されます。',
@@ -41,9 +42,8 @@ const application_details = {
   redirect_uri_placeholder_native: 'io.logto://callback',
   redirect_uri_tip:
     'ユーザーがサインイン（成功した場合も失敗した場合も）した後にリダイレクトされる URI です。詳細については、OpenID Connect の<a>AuthRequest</a>を参照してください。',
-  /** UNTRANSLATED */
   mixed_redirect_uri_warning:
-    'Your application type is not compatible with at least one of the redirect URIs. It does not follow best practices and we strongly recommend keeping the redirect URIs consistent.',
+    'アプリケーションの種類は少なくとも一つのリダイレクト URI と互換性がありません。これは最善のプラクティスに従っておらず、リダイレクト URI を一貫性のあるものにすることを強くお勧めします。',
   post_sign_out_redirect_uri: 'サインアウト後のリダイレクト URI',
   post_sign_out_redirect_uris: 'サインアウト後のリダイレクト URI',
   post_sign_out_redirect_uri_placeholder: 'https://your.website.com/home',
@@ -67,9 +67,8 @@ const application_details = {
   rotate_refresh_token: 'Refresh Token を切り替える',
   rotate_refresh_token_label:
     '有効にすると、Logto は、元の TTL の 70％ が経過したときまたは特定の条件が満たされた場合、トークン要求で新しい Refresh Token を発行します。<a>詳細を見る</a>',
-  /** UNTRANSLATED */
   rotate_refresh_token_label_for_public_clients:
-    'When enabled, Logto will issue a new refresh token for each token request. <a>Learn more</a>',
+    '有効にすると、Logto は各トークンリクエストに対して新しいリフレッシュトークンを発行します。<a>詳細を見る</a>',
   backchannel_logout: 'バックチャネルログアウト',
   backchannel_logout_description:
     'OpenID Connect バックチャネルログアウトエンドポイントを構成し、このアプリケーションにセッションが必要かどうかを設定します。',
@@ -83,27 +82,29 @@ const application_details = {
   application_deleted: 'アプリケーション{{name}}が正常に削除されました',
   redirect_uri_required: 'リダイレクト URI を少なくとも 1 つ入力する必要があります',
   app_domain_description_1:
-    'Feel free to use your domain with {{domain}} powered by Logto, which is permanently valid.',
+    'Logto によって提供される {{domain}} を使用して、ドメインを自由に利用できます。これは永久に有効です。',
   app_domain_description_2:
-    'Feel free to utilize your domain <domain>{{domain}}</domain> which is permanently valid.',
+    'Logto によって提供される <domain>{{domain}}</domain> を自由に利用できます。これは永久に有効です。',
   custom_rules: 'カスタム認証ルール',
   custom_rules_placeholder: '^/(admin|privacy)/.+',
   custom_rules_description:
-    'Set rules with regular expressions for authentication-required routes. Default: full-site protection if left blank.',
+    '認証が必要なルートのために正規表現でルールを設定します。デフォルトとして、このフィールドが空の場合、サイト全体が保護されます。',
   authentication_routes: '認証ルート',
   custom_rules_tip:
-    "Here are two case scenarios:<ol><li>To only protect routes '/admin' and '/privacy' with authentication: ^/(admin|privacy)/.*</li><li>To exclude JPG images from authentication: ^(?!.*\\.jpg$).*$</li></ol>",
+    "以下のようなケースがあります：<ol><li>認証で '/admin' と '/privacy' ルートのみを保護する: ^/(admin|privacy)/.*</li><li>JPG 画像を認証から除外する: ^(?!.*\\.jpg$).*$</li></ol>",
   authentication_routes_description:
-    'Redirect your authentication button using the specified routes. Note: These routes are irreplaceable.',
+    '指定されたルートを使用して認証ボタンをリダイレクトします。注意：これらのルートは置き換えることはできません。',
   protect_origin_server: 'オリジンサーバーを保護する',
   protect_origin_server_description:
-    'Ensure to protect your origin server from direct access. Refer to the guide for more <a>detailed instructions</a>.',
+    'オリジンサーバーへの直接アクセスを保護してください。詳細については、ガイドを参照してください。<a>詳細な手順</a>',
+  third_party_settings_description:
+    'OIDC / OAuth 2.0 を使用して Logto をアイデンティティプロバイダ（IdP）として、サードパーティアプリケーションと統合し、ユーザー承認のための同意画面を提供します。',
   session_duration: 'セッション期間（日単位）',
   try_it: 'お試しください',
-  no_organization_placeholder: 'No organization found. <a>Go to organizations</a>',
+  no_organization_placeholder: '組織が見つかりません。<a>組織に行く</a>',
   field_custom_data: 'カスタムデータ',
   field_custom_data_tip:
-    '追加のカスタムアプリケーション情報で、事前定義されたアプリケーションプロパティにリストされていないもの。たとえば、ビジネス固有の設定と構成。',
+    '事前定義されたアプリケーションプロパティにリストされていない追加のカスタムアプリケーション情報。例えば、ビジネス固有の設定と構成。',
   custom_data_invalid: 'カスタムデータは有効な JSON オブジェクトである必要があります',
   branding: {
     name: 'ブランディング',
@@ -183,12 +184,9 @@ const application_details = {
     create_new_secret: '新しいシークレットを作成',
     delete_confirmation:
       'この操作は元に戻せません。本当にこのシークレットを削除してもよろしいですか？',
-    /** UNTRANSLATED */
-    deleted: 'The secret has been successfully deleted.',
-    /** UNTRANSLATED */
-    activated: 'The secret has been successfully activated.',
-    /** UNTRANSLATED */
-    deactivated: 'The secret has been successfully deactivated.',
+    deleted: 'シークレットは正常に削除されました。',
+    activated: 'シークレットは正常にアクティブ化されました。',
+    deactivated: 'シークレットは正常に非アクティブ化されました。',
     legacy_secret: 'レガシーシークレット',
     expired: '期限切れ',
     expired_tooltip: 'このシークレットは {{date}} に期限切れになりました。',
@@ -200,10 +198,8 @@ const application_details = {
         'シークレットは期限切れになりません。セキュリティを強化するため、有効期限を設定することをお勧めします。',
       days: '{{count}} 日',
       days_other: '{{count}} 日間',
-      /** UNTRANSLATED */
-      years: '{{count}} year',
-      /** UNTRANSLATED */
-      years_other: '{{count}} years',
+      years: '{{count}} 年',
+      years_other: '{{count}} 年間',
       created: 'シークレット {{name}} が正常に作成されました。',
     },
     edit_modal: {
@@ -212,91 +208,56 @@ const application_details = {
     },
   },
   saml_idp_config: {
-    /** UNTRANSLATED */
-    title: 'SAML IdP metadata',
-    /** UNTRANSLATED */
-    description:
-      'Use the following metadata and certificate to configure the SAML IdP in your application.',
-    /** UNTRANSLATED */
-    metadata_url_label: 'IdP metadata URL',
-    /** UNTRANSLATED */
-    single_sign_on_service_url_label: 'Single sign-on service URL',
-    /** UNTRANSLATED */
-    idp_entity_id_label: 'IdP entity ID',
+    title: 'SAML IdP メタデータ',
+    description: '次のメタデータと証明書を使用して、アプリケーションで SAML IdP を構成します。',
+    metadata_url_label: 'IdP メタデータ URL',
+    single_sign_on_service_url_label: 'シングルサインオンサービス URL',
+    idp_entity_id_label: 'IdP エンティティ ID',
   },
   saml_idp_certificates: {
-    /** UNTRANSLATED */
-    title: 'SAML signing certificate',
-    /** UNTRANSLATED */
-    expires_at: 'Expires at',
-    /** UNTRANSLATED */
-    finger_print: 'Fingerprint',
-    /** UNTRANSLATED */
-    status: 'Status',
-    /** UNTRANSLATED */
-    active: 'Active',
-    /** UNTRANSLATED */
-    inactive: 'Inactive',
+    title: 'SAML 署名証明書',
+    expires_at: '有効期限',
+    finger_print: 'フィンガープリント',
+    status: '状態',
+    active: 'アクティブ',
+    inactive: '非アクティブ',
   },
   saml_idp_name_id_format: {
-    /** UNTRANSLATED */
-    title: 'Name ID format',
-    /** UNTRANSLATED */
-    description: 'Select the name ID format of the SAML IdP.',
-    /** UNTRANSLATED */
-    persistent: 'Persistent',
-    /** UNTRANSLATED */
-    persistent_description: 'Use Logto user ID as Name ID',
-    /** UNTRANSLATED */
-    transient: 'Transient',
-    /** UNTRANSLATED */
-    transient_description: 'Use one-time user ID as Name ID',
-    /** UNTRANSLATED */
-    unspecified: 'Unspecified',
-    /** UNTRANSLATED */
-    unspecified_description: 'Use Logto user ID as Name ID',
-    /** UNTRANSLATED */
-    email_address: 'Email address',
-    /** UNTRANSLATED */
-    email_address_description: 'Use email address as Name ID',
+    title: 'Name ID フォーマット',
+    description: 'SAML IdP の Name ID フォーマットを選択します。',
+    persistent: '永続的',
+    persistent_description: 'Logto ユーザー ID を Name ID として使用',
+    transient: '一時的',
+    transient_description: '一回限りのユーザー ID を Name ID として使用',
+    unspecified: '未指定',
+    unspecified_description: 'Logto ユーザー ID を Name ID として使用',
+    email_address: 'メールアドレス',
+    email_address_description: 'メールアドレスを Name ID として使用',
   },
   saml_encryption_config: {
-    /** UNTRANSLATED */
-    encrypt_assertion: 'Encrypt SAML assertion',
-    /** UNTRANSLATED */
-    encrypt_assertion_description: 'By enabling this option, the SAML assertion will be encrypted.',
-    /** UNTRANSLATED */
-    encrypt_then_sign: 'Encrypt then sign',
-    /** UNTRANSLATED */
+    encrypt_assertion: 'SAML アサーションを暗号化',
+    encrypt_assertion_description:
+      'このオプションを有効にすると、SAML アサーションが暗号化されます。',
+    encrypt_then_sign: '暗号化してから署名',
     encrypt_then_sign_description:
-      'By enabling this option, the SAML assertion will be encrypted and then signed; otherwise, the SAML assertion will be signed and then encrypted.',
-    /** UNTRANSLATED */
-    certificate: 'Certificate',
-    /** UNTRANSLATED */
+      'このオプションを有効にすると、SAML アサーションが暗号化されてから署名されます。それ以外の場合、SAML アサーションは署名されてから暗号化されます。',
+    certificate: '証明書',
     certificate_tooltip:
-      'Copy and paste the x509 certificate you get from your service provider to encrypt the SAML assertion.',
-    /** UNTRANSLATED */
+      'サービスプロバイダから取得した x509 証明書をコピーして貼り付け、SAML アサーションを暗号化します。',
     certificate_placeholder:
       '-----BEGIN CERTIFICATE-----\nMIICYDCCAcmgAwIBA...\n-----END CERTIFICATE-----\n',
-    /** UNTRANSLATED */
-    certificate_missing_error: 'Certificate is required.',
-    /** UNTRANSLATED */
+    certificate_missing_error: '証明書が必要です。',
     certificate_invalid_format_error:
-      'Invalid certificate format detected. Please check the certificate format and try again.',
+      '無効な証明書フォーマットが検出されました。証明書のフォーマットを確認してもう一度試してください。',
   },
   saml_app_attribute_mapping: {
-    /** UNTRANSLATED */
-    name: 'Attribute mappings',
-    /** UNTRANSLATED */
-    title: 'Base attribute mappings',
-    /** UNTRANSLATED */
-    description: 'Add attribute mappings to sync user profile from Logto to your application.',
-    /** UNTRANSLATED */
-    col_logto_claims: 'Value of Logto',
-    /** UNTRANSLATED */
-    col_sp_claims: 'Value name of your application',
-    /** UNTRANSLATED */
-    add_button: 'Add another',
+    name: '属性マッピング',
+    title: '基本属性マッピング',
+    description:
+      'Logto からアプリケーションにユーザープロファイルを同期するために属性マッピングを追加します。',
+    col_logto_claims: 'Logto の値',
+    col_sp_claims: 'アプリケーションの値名',
+    add_button: '別のものを追加',
   },
 };
 

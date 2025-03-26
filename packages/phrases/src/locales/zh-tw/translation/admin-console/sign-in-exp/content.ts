@@ -1,6 +1,7 @@
 const content = {
   terms_of_use: {
     title: 'TERMS',
+    description: '添加使用條款和隱私政策以滿足合規要求。',
     terms_of_use: 'Terms of use URL',
     terms_of_use_placeholder: 'https://your.terms.of.use/',
     privacy_policy: 'Privacy policy URL',
@@ -25,17 +26,11 @@ const content = {
       'When auto-detect is off, the default language is the only language your software will show. Turn on auto-detect for language extension.',
   },
   support: {
-    /** UNTRANSLATED */
-    title: 'SUPPORT',
-    /** UNTRANSLATED */
-    subtitle: 'Display your support channels on error pages for quick user assistance.',
-    /** UNTRANSLATED */
-    support_email: 'Support email',
-    /** UNTRANSLATED */
+    title: '支援',
+    subtitle: '在錯誤頁面上顯示你的支援渠道，以便用戶快速獲得幫助。',
+    support_email: '支援電子郵件',
     support_email_placeholder: 'support@email.com',
-    /** UNTRANSLATED */
-    support_website: 'Support website',
-    /** UNTRANSLATED */
+    support_website: '支援網站',
     support_website_placeholder: 'https://your.website/support',
   },
   manage_language: {

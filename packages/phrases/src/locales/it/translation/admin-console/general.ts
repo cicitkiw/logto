@@ -13,8 +13,7 @@ const general = {
   save_changes: 'Salva modifiche',
   saved: 'Salvato',
   discard: 'Elimina',
-  /** UNTRANSLATED */
-  download: 'Download',
+  download: 'Scarica',
   loading: 'Caricamento...',
   redirecting: 'Redirezione...',
   add: 'Aggiungi',
@@ -30,10 +29,8 @@ const general = {
   edit: 'Modifica',
   delete: 'Elimina',
   deleted: 'Eliminato',
-  /** UNTRANSLATED */
-  activate: 'Activate',
-  /** UNTRANSLATED */
-  deactivate: 'Deactivate',
+  activate: 'Attiva',
+  deactivate: 'Disattiva',
   more_options: 'PIÙ OPZIONI',
   close: 'Chiudi',
   copy: 'Copia',
@@ -53,7 +50,7 @@ const general = {
   continue: 'Continua',
   page_info: '{{min, number}}-{{max, number}} di {{total, number}}',
   learn_more: 'Scopri di più',
-  tab_error_one: '{{count, number}} errore',
+  tab_error: '{{count, number}} errore',
   tab_error_other: '{{count, number}} errori',
   skip_for_now: 'Salta per ora',
   remove: 'Rimuovi',

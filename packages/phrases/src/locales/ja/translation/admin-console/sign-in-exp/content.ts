@@ -1,9 +1,10 @@
 const content = {
   terms_of_use: {
     title: 'TERMS',
-    terms_of_use: 'Terms of use URL',
+    description: 'コンプライアンス要件を満たすために、利用規約とプライバシーを追加してください。',
+    terms_of_use: '利用規約 URL',
     terms_of_use_placeholder: 'https://your.terms.of.use/',
-    privacy_policy: 'Privacy policy URL',
+    privacy_policy: 'プライバシーポリシー URL',
     privacy_policy_placeholder: 'https://your.privacy.policy/',
     agree_to_terms: '利用規約に同意する',
     agree_policies: {
@@ -25,17 +26,11 @@ const content = {
       'When auto-detect is off, the default language is the only language your software will show. Turn on auto-detect for language extension.',
   },
   support: {
-    /** UNTRANSLATED */
-    title: 'SUPPORT',
-    /** UNTRANSLATED */
-    subtitle: 'Display your support channels on error pages for quick user assistance.',
-    /** UNTRANSLATED */
-    support_email: 'Support email',
-    /** UNTRANSLATED */
+    title: 'サポート',
+    subtitle: 'エラーページにサポートチャンネルを表示して、迅速にユーザーを支援します。',
+    support_email: 'サポートメール',
     support_email_placeholder: 'support@email.com',
-    /** UNTRANSLATED */
-    support_website: 'Support website',
-    /** UNTRANSLATED */
+    support_website: 'サポートウェブサイト',
     support_website_placeholder: 'https://your.website/support',
   },
   manage_language: {

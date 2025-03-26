@@ -2,7 +2,7 @@
 // TODO: refactor this file to reduce LOC
 import { authRequestInfoGuard } from '@logto/schemas';
 import { generateStandardId, generateStandardShortId } from '@logto/shared';
-import { cond, type Nullable, removeUndefinedKeys, trySafe } from '@silverhand/essentials';
+import { cond, removeUndefinedKeys, trySafe } from '@silverhand/essentials';
 import { addMinutes } from 'date-fns';
 import { z } from 'zod';
 
@@ -16,20 +16,20 @@ import { generateAutoSubmitForm } from '#src/saml-application/SamlApplication/ut
 import assertThat from '#src/utils/assert-that.js';
 import { getConsoleLogFromContext } from '#src/utils/console.js';
 
-const samlApplicationSignInCallbackQueryParametersGuard = z.union([
-  z.object({
+import { verifyAndGetSamlSessionData } from './utils.js';
+
+const samlApplicationSignInCallbackQueryParametersGuard = z
+  .object({
     code: z.string(),
-    state: z.string().optional(),
-    redirectUri: z.string().optional(),
-  }),
-  z.object({
+    state: z.string(),
+    redirectUri: z.string(),
     error: z.string(),
-    error_description: z.string().optional(),
-  }),
-]);
+    error_description: z.string(),
+  })
+  .partial();
 
 export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter>(
-  ...[router, { id: tenantId, libraries, queries, envSet }]: RouterInitArgs<T>
+  ...[router, { queries, envSet }]: RouterInitArgs<T>
 ) {
   const {
     samlApplications: { getSamlApplicationDetailsById },
@@ -52,7 +52,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
       const { id } = ctx.guard.params;
 
       const details = await getSamlApplicationDetailsById(id);
-      const samlApplication = new SamlApplication(details, id, envSet.oidc.issuer, tenantId);
+      const samlApplication = new SamlApplication(details, id, envSet);
 
       ctx.status = 200;
       ctx.body = samlApplication.idPMetadata;
@@ -70,12 +70,63 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
       status: [200, 400, 404],
     }),
     koaAuditLog(queries),
+    // eslint-disable-next-line complexity
     async (ctx, next) => {
       const consoleLog = getConsoleLogFromContext(ctx);
       const {
         params: { id },
         query,
       } = ctx.guard;
+
+      /**
+       * When generating swagger.json, we build path/query guards and verify whether the query/path guard is an instance of ZodObject. Previously, our query guard was a Union of Zod Objects, which failed the validation. Now, we directly use ZodObject guards and perform additional validations within the API.
+       */
+      /* === query guard === */
+      // Validate query parameters
+      if (!query.code && !query.error) {
+        throw new RequestError({
+          code: 'guard.invalid_input',
+          message: 'Either code or error must be present',
+          type: 'query',
+        });
+      }
+
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      if (query.code && (query.error || query.error_description)) {
+        throw new RequestError({
+          code: 'guard.invalid_input',
+          type: 'query',
+          message: 'Cannot have both code and error fields',
+        });
+      }
+
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      if (query.error && (query.code || query.state || query.redirectUri)) {
+        throw new RequestError({
+          code: 'guard.invalid_input',
+          type: 'query',
+          message: 'When error is present, only error_description is allowed',
+        });
+      }
+
+      // Handle error in query parameters
+      if (query.error) {
+        throw new RequestError({
+          code: 'oidc.invalid_request',
+          message: query.error_description,
+          type: 'query',
+        });
+      }
+
+      assertThat(
+        query.code,
+        new RequestError({
+          code: 'guard.invalid_input',
+          type: 'query',
+          message: '`code` is required.',
+        })
+      );
+      /* === End query guard === */
 
       const log = ctx.createLog('SamlApplication.Callback');
 
@@ -84,16 +135,8 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
         applicationId: id,
       });
 
-      // Handle error in query parameters
-      if ('error' in query) {
-        throw new RequestError({
-          code: 'oidc.invalid_request',
-          message: query.error_description,
-        });
-      }
-
       const details = await getSamlApplicationDetailsById(id);
-      const samlApplication = new SamlApplication(details, id, envSet.oidc.issuer, tenantId);
+      const samlApplication = new SamlApplication(details, id, envSet);
 
       assertThat(
         samlApplication.config.redirectUri === samlApplication.samlAppCallbackUrl,
@@ -106,37 +149,31 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
         assertThat(redirectUri === samlApplication.samlAppCallbackUrl, 'oidc.invalid_redirect_uri');
       }
 
-      // eslint-disable-next-line @silverhand/fp/no-let
-      let relayState: Nullable<string> = null;
-      // eslint-disable-next-line @silverhand/fp/no-let
-      let samlRequestId: Nullable<string> = null;
-
-      if (state) {
-        const sessionId = ctx.cookies.get(spInitiatedSamlSsoSessionCookieName);
-        assertThat(
+      const { relayState, samlRequestId, sessionId, sessionExpiresAt } =
+        await verifyAndGetSamlSessionData(ctx, queries.samlApplicationSessions, state);
+      log.append({
+        session: {
+          relayState,
+          samlRequestId,
           sessionId,
-          'application.saml.sp_initiated_saml_sso_session_not_found_in_cookies'
-        );
-        const session = await findSessionById(sessionId);
-        assertThat(session, 'application.saml.sp_initiated_saml_sso_session_not_found');
-
-        // eslint-disable-next-line @silverhand/fp/no-mutation
-        relayState = session.relayState;
-        // eslint-disable-next-line @silverhand/fp/no-mutation
-        samlRequestId = session.samlRequestId;
-
-        assertThat(session.oidcState === state, 'application.saml.state_mismatch');
-      }
+          sessionExpiresAt,
+        },
+      });
 
       // Handle OIDC callback and get user info
       const userInfo = await samlApplication.handleOidcCallbackAndGetUserInfo({
         code,
+      });
+      log.append({
+        userInfo,
       });
 
       const { context, entityEndpoint } = await samlApplication.createSamlResponse({
         userInfo,
         relayState,
         samlRequestId,
+        sessionId,
+        sessionExpiresAt,
       });
 
       log.append({
@@ -211,7 +248,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
       });
 
       const details = await getSamlApplicationDetailsById(id);
-      const samlApplication = new SamlApplication(details, id, envSet.oidc.issuer, tenantId);
+      const samlApplication = new SamlApplication(details, id, envSet);
 
       const octetString = Object.keys(ctx.request.query)
         // eslint-disable-next-line no-restricted-syntax
@@ -230,6 +267,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
           octetString,
         });
 
+        log.append({ loginRequestResult });
         const extractResult = authRequestInfoGuard.safeParse(loginRequestResult.extract);
         log.append({ extractResult });
 
@@ -243,7 +281,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
         log.append({ extractResultData: extractResult.data });
 
         assertThat(
-          extractResult.data.issuer === samlApplication.config.entityId,
+          extractResult.data.issuer === samlApplication.config.spEntityId,
           'application.saml.auth_request_issuer_not_match'
         );
 
@@ -320,7 +358,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
       });
 
       const details = await getSamlApplicationDetailsById(id);
-      const samlApplication = new SamlApplication(details, id, envSet.oidc.issuer, tenantId);
+      const samlApplication = new SamlApplication(details, id, envSet);
 
       // Parse login request
       try {
@@ -330,6 +368,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
           },
         });
 
+        log.append({ loginRequestResult });
         const extractResult = authRequestInfoGuard.safeParse(loginRequestResult.extract);
         log.append({ extractResult });
 
@@ -342,7 +381,7 @@ export default function samlApplicationAnonymousRoutes<T extends AnonymousRouter
         log.append({ extractResultData: extractResult.data });
 
         assertThat(
-          extractResult.data.issuer === samlApplication.config.entityId,
+          extractResult.data.issuer === samlApplication.config.spEntityId,
           'application.saml.auth_request_issuer_not_match'
         );
 

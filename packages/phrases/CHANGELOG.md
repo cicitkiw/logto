@@ -1,5 +1,33 @@
 # Change Log
 
+## 1.18.0
+
+### Minor Changes
+
+- 0b785ee0d: feat(console): display jwks uri on application details page
+
+### Patch Changes
+
+- 5086f4bd2: update documentation links in Console
+- e11e57de8: bump dependencies for security update
+- Updated dependencies [e11e57de8]
+  - @logto/language-kit@1.1.1
+
+## 1.17.0
+
+### Minor Changes
+
+- 1337669e1: add support on SAML applications
+
+  Logto now supports acting as a SAML identity provider (IdP), enabling enterprise users to achieve secure Single Sign-On (SSO) through the standardized SAML protocol. Key features include:
+
+  - Full support for SAML 2.0 protocol
+  - Flexible attribute mapping configuration
+  - Metadata auto-configuration support
+  - Enterprise-grade encryption and signing
+
+  [View full documentation](https://docs.logto.io/integrate-logto/saml-app) for more details.
+
 ## 1.16.0
 
 ### Minor Changes

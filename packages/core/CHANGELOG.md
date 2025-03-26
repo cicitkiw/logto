@@ -1,5 +1,236 @@
 # Change Log
 
+## 1.25.0
+
+### Minor Changes
+
+- 1c7bdf9ba: add legacy password type supporting custom hasing function, credits @fre2d0m
+
+  You can now set the type of `password_encryption_method` to `legacy`, and store info with a JSON string format (containing a hash algorithm, arguments, and an encrypted password) in the `password_encrypted` field. By doing this, you can use any hash algorithm supported by Node.js, this is useful when migrating from other password hash algorithms, especially for the ones that include salt.
+
+  The format of the JSON string is as follows:
+
+  ```json
+  ["hash_algorithm", ["argument1", "argument2", ...], "expected_hashed_value"]
+  ```
+
+  And you can use `@` as the input password in the arguments.
+
+  For example, if you are using SHA256 with a salt, you can store the password in the following format:
+
+  ```json
+  [
+    "sha256",
+    ["salt123", "@"],
+    "c465f66c6ac481a7a17e9ed5b4e2e7e7288d892f12bf1c95c140901e9a70436e"
+  ]
+  ```
+
+  Then when the user uses the password (`password123`), the `legacyVerify` function will use the `sha256` algorithm with the `salt123` and the input password to verify the password.
+
+  In this case, `salt123` is the first argument, `@` is the input password, then the following code will be executed:
+
+  ```ts
+  const hash = crypto.createHash("sha256");
+  hash.update("salt123" + "password123");
+  const expectedHashedValue = hash.digest("hex");
+  ```
+
+- 03ea1f96c: feat: custom email templates in multiple languages via Management API
+
+  ## Details
+
+  Introduce localized email template customization capabilities. This update allows administrators to create and manage multiple email templates for different languages and template types (e.g., SignIn, ForgotPassword) via the management API.
+
+  Email connectors now support automatic template selection based on the user's preferred language. If a template is not available in the user's preferred language, the default template will be used.
+
+  - For client-side API requests, like experience API and user account API, the user's preferred language is determined by the `Accept-Language` header.
+  - For server-side API requests, like organization invitation API, email language preference can be set by passing extra `locale` parameter in the `messagePayload`.
+  - The email template selection logic is based on the following priority order:
+    1. Find the template that matches the user's preferred language detected from the request.
+    2. Find the template that matches the default language set in the sign-in experience settings.
+    3. Use the default template set in the email connector settings.
+
+  ### Management API
+
+  - `PUT /email-templates`: Bulk create or update email templates.
+  - `GET /email-templates`: List all email templates with filter by language and type support.
+  - `DELETE /email-templates`: Bulk delete email templates by language and type.
+  - `GET /email-templates/{id}`: Get a specific email template by ID.
+  - `DELETE /email-templates/{id}`: Delete a specific email template by ID.
+  - `PATCH /email-templates/{id}/details`: Update email template details by ID.
+
+  ### Supported email connectors
+
+  - `@logto/connector-aliyun-dm`
+  - `@logto/connector-aws-ses`
+  - `@logto/connector-mailgun`
+  - `@logto/connector-sendgrid-email`
+  - `@logto/connector-smtp`
+
+  ### Unsupported email connectors
+
+  The following email connectors have their templates managed at the provider side and do not support reading templates from Logto.
+  The user's preferred language will be passed to the provider as the `locale` parameter in the email sending request payload. For i18n support, administrators must manage the template selection logic at the provider side.
+
+  - `@logto/connector-postmark`
+  - `@logto/connector-http-email`
+
+- 03ea1f96c: pass additional context variables to email templates
+
+  Enhanced email template customization by introducing additional context variables that developers can utilize in message templates. These new variables provide deeper contextual information about the authentication workflow, enabling more personalized and scenario-specific email content.
+
+  - user: `UserInfo` - Contains basic user profile data (name, primaryEmail, etc.) for personalization
+  - application: `ApplicationInfo` - Contains basic application-specific data (name, logo, etc.) for personalization
+  - organization: `OrganizationInfo` - Contains basic organization-specific data (name, logo, etc.) for personalization
+  - inviter: `UserInfo` - Contains basic inviter profile data (name, primaryEmail, etc.) for personalization
+
+  | usageType                | Scenario                                                                                                                                                                                                                                                                                                                                                                      | Variables                                                                             |
+  | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+  | SignIn                   | Users sign in using their email and verify by entering verification code instead of entering a password.                                                                                                                                                                                                                                                                      | code: string<br/>application: `ApplicationInfo`<br/>organization?: `OrganizationInfo` |
+  | Register                 | Users create an account using their email and verify it by entering a verification code sent by Logto to their email.                                                                                                                                                                                                                                                         | code: string<br/>application: `ApplicationInfo`<br/>organization?: `OrganizationInfo` |
+  | ForgotPassword           | If users forget their password during login, they can choose to verify their identity using the email they've already verified with Logto.                                                                                                                                                                                                                                    | code: string<br/>application: `ApplicationInfo`<br/>organization?: `OrganizationInfo` |
+  | Generic                  | This template can be used as a general backup option for various scenarios, including testing connector configurations and so on.                                                                                                                                                                                                                                             | code: string                                                                          |
+  | OrganizationInvitation   | Use this template to send users an invitation link to join the organization.                                                                                                                                                                                                                                                                                                  | link: string<br/>organization: `OrganizationInfo`<br/>inviter?: `UserInfo`            |
+  | UserPermissionValidation | During app usage, there may be some high-risk operations or operations with a relatively high risk level that require additional user verification, such as bank transfers, deleting resources in use, and canceling memberships. The `UserPermissionValidation` template can be used to define the content of the email verification code users receive in these situations. | code: string<br/>user: `UserInfo`<br/>application?: `ApplicationInfo`                 |
+  | BindNewIdentifier        | When a user modifies their profile, they may bind an email address to their current account. In this case, the `BindNewIdentifier` template can be used to customize the content of the verification email.                                                                                                                                                                   | code: string<br/>user: `UserInfo`<br/>application?: `ApplicationInfo`                 |
+
+  Check [Email templates](https://docs.logto.io/connectors/email-connectors/email-templates) for more information on how to use these new context variables in your email templates.
+
+- c87424025: feat: support role names alongside role IDs in organization user role assignment/replacement with merge capability
+
+  This update enhances organization user role management APIs to support role assignment by both names and IDs, improving integration flexibility.
+
+  ### Updates
+
+  - Added `organizationRoleNames` parameter to:
+    - POST `/api/organizations/{id}/users/{userId}/roles` (assign roles)
+    - PUT `/api/organizations/{id}/users/{userId}/roles` (replace roles)
+  - Make both `organizationRoleNames` and `organizationRoleIds` optional in the above APIs
+    - If both are not provided, or empty, an invalid data error will be thrown
+  - Merge logic when both parameters are provided:
+    - Combines roles from `organizationRoleNames` and `organizationRoleIds`
+    - Automatically deduplicates entries
+    - Validates all names/IDs exist before applying changes
+  - Maintains backward compatibility with existing integrations using role IDs
+
+### Patch Changes
+
+- bca4177c6: add `AuthnStatement` to SAML app assertion response
+- 20b61e05e: refactor: adjust TOTP secret length to 20 bytes
+
+  Update the TOTP secret generation to use 20 bytes (160 bits), following the recommendation in RFC 6238 (TOTP) and RFC 4226 (HOTP).
+
+  This aligns with the standard secret length used by most 2FA applications and provides better security while maintaining compatibility with existing TOTP validators.
+
+  Reference:
+
+  - RFC 6238 (TOTP) Section 5.1: https://www.rfc-editor.org/rfc/rfc6238#section-5.1
+  - RFC 4226 (HOTP) Section 4, Requirement 6: https://www.rfc-editor.org/rfc/rfc4226#section-4
+
+- f15602f19: fix: incorrect pagination behavior in organization role scopes APIs
+
+  - Fix `/api/organization-roles/{id}/scopes` and `/api/organization-roles/{id}/resource-scopes` endpoints to:
+    - Return all scopes when no pagination parameters are provided
+    - Support optional pagination when query parameters are present
+  - Fix Console to properly display all organization role scopes on the organization template page
+
+- Updated dependencies [1c7bdf9ba]
+- Updated dependencies [b0135bcd3]
+- Updated dependencies [31adfb6ac]
+  - @logto/schemas@1.25.0
+  - @logto/connector-kit@4.2.0
+  - @logto/console@1.22.1
+  - @logto/cli@1.25.0
+
+## 1.24.1
+
+### Patch Changes
+
+- e7accfdab: prevent i18n context contamination by using request-scoped instances
+
+  This bug fix resolves a concurrency issue in i18n handling by moving from a global i18next instance to request-scoped instances.
+
+  ### Problem
+
+  When handling concurrent requests:
+
+  - The shared global `i18next` instance's language was being modified via `changeLanguage()` calls.
+  - This could lead to race conditions where requests might receive translations in unexpected languages.
+  - Particularly problematic in multi-tenant environments with different language requirements.
+
+  ### Solution
+
+  - Updated `koaI18next` middleware to create a cloned i18next instance for each request.
+  - Attach the request-scoped instance to Koa context (`ctx.i18n`) All subsequent middleware and handlers should now use `ctx.i18n` instead of the global `i18next` instance.
+  - Maintains the global instance for initialization while preventing cross-request contamination
+
+- a5990ec57: fixes an incorrect condition check in the verification code flow where `isNewIdentifier` was using inverted logic for email and phone comparisons.
+
+  ### Changes
+
+  - Corrected `isNewIdentifier` boolean logic to use `identifier.value !== user.primaryEmail` for email checks
+  - Fixed phone number comparison to properly use `identifier.value !== user.primaryPhone`
+
+  ### Impact
+
+  This fixes a regression where:
+
+  - Verification codes for existing emails/phones were incorrectly using the`BindNewIdentifier` template
+  - New identifiers were mistakenly getting the `UserPermissionValidation` template
+  - Affected both email and phone verification flows
+
+- e11e57de8: bump dependencies for security update
+- d44007faa: apply custom domain to SAML SSO and SAML applications
+- Updated dependencies [096367ff5]
+- Updated dependencies [28643c1f1]
+- Updated dependencies [bd18da4cf]
+- Updated dependencies [0b785ee0d]
+- Updated dependencies [cb261024b]
+- Updated dependencies [5086f4bd2]
+- Updated dependencies [e11e57de8]
+- Updated dependencies [d44007faa]
+  - @logto/console@1.22.0
+  - @logto/experience@1.11.2
+  - @logto/experience-legacy@1.11.1
+  - @logto/phrases@1.18.0
+  - @logto/cli@1.24.1
+  - @logto/connector-kit@4.1.1
+  - @logto/language-kit@1.1.1
+  - @logto/core-kit@2.5.4
+  - @logto/app-insights@2.0.1
+  - @logto/schemas@1.24.1
+  - @logto/shared@3.1.4
+  - @logto/demo-app@1.4.2
+  - @logto/phrases-experience@1.9.1
+
+## 1.24.0
+
+### Minor Changes
+
+- 1337669e1: add support on SAML applications
+
+  Logto now supports acting as a SAML identity provider (IdP), enabling enterprise users to achieve secure Single Sign-On (SSO) through the standardized SAML protocol. Key features include:
+
+  - Full support for SAML 2.0 protocol
+  - Flexible attribute mapping configuration
+  - Metadata auto-configuration support
+  - Enterprise-grade encryption and signing
+
+  [View full documentation](https://docs.logto.io/integrate-logto/saml-app) for more details.
+
+### Patch Changes
+
+- bf2d3007c: fix(core): trigger the `Organization.Membership.Updated` webhook when a user accepts an invitation and join an organization.
+
+  Added a new `Organization.Membership.Accepted` webhook event in the `PUT /api/organization-invitations/{id}/status` endpoint. This event will be triggered when the organization-invitation status is updated to `accepted`, and user is added to the organization.
+
+- Updated dependencies [1337669e1]
+  - @logto/console@1.21.0
+  - @logto/phrases@1.17.0
+  - @logto/schemas@1.24.0
+  - @logto/cli@1.24.0
+
 ## 1.23.1
 
 ### Patch Changes

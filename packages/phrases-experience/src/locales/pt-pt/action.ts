@@ -29,10 +29,9 @@ const action = {
   verify_via_passkey: 'Verificar através de chave de acesso',
   download: 'Transferir',
   single_sign_on: 'Logon Único',
-  /** UNTRANSLATED */
-  authorize: 'Authorize',
-  /** UNTRANSLATED */
-  use_another_account: 'Use another account',
+  authorize: '授权',
+  use_another_account: '使用其他账户',
+  back_to_current_account: 'Voltar à conta atual',
 };
 
 export default Object.freeze(action);

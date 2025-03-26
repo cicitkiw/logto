@@ -29,10 +29,9 @@ const action = {
   verify_via_passkey: 'Überprüfen über Passkey',
   download: 'Herunterladen',
   single_sign_on: 'Single Sign-On',
-  /** UNTRANSLATED */
-  authorize: 'Authorize',
-  /** UNTRANSLATED */
-  use_another_account: 'Use another account',
+  authorize: 'Autorisieren',
+  use_another_account: 'Anderes Konto verwenden',
+  back_to_current_account: 'Zurück zum aktuellen Konto',
 };
 
 export default Object.freeze(action);

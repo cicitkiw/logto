@@ -30,21 +30,17 @@ const mfa = {
   mandatory: 'Os usuários sempre precisam usar o MFA no login',
   mandatory_tip:
     'Os usuários devem configurar o MFA na primeira vez no login ou inscrição e usá-lo em todos os logins futuros.',
-  /** UNTRANSLATED */
-  require_mfa: 'Require MFA',
-  /** UNTRANSLATED */
+  require_mfa: 'Exigir MFA',
   require_mfa_label:
-    'Enable this to make 2-step verification mandatory for accessing your applications. If disabled, users can decide whether to enable MFA for themselves.',
-  /** UNTRANSLATED */
-  set_up_prompt: 'MFA set-up prompt',
-  /** UNTRANSLATED */
-  no_prompt: 'Do not ask users to set up MFA',
-  /** UNTRANSLATED */
+    'Ative isto para tornar a verificação em duas etapas obrigatória para acessar as suas aplicações. Se desativado, os usuários podem decidir se ativam o MFA por si mesmos.',
+  set_up_prompt: 'Prompt de configuração do MFA',
+  no_prompt: 'Não pedir aos usuários para configurar o MFA',
   prompt_at_sign_in_and_sign_up:
-    'Ask users to set up MFA during registration (skippable, one-time prompt)',
-  /** UNTRANSLATED */
+    'Pedir aos usuários para configurar o MFA durante o registo (pode ser ignorado, prompt único)',
   prompt_only_at_sign_in:
-    'Ask users to set up MFA on their next sign-in attempt after registration (skippable, one-time prompt)',
+    'Pedir aos usuários para configurar o MFA na próxima tentativa de início de sessão após o registo (pode ser ignorado, prompt único)',
+  set_up_organization_required_mfa_prompt: 'MFA 设置提示，适用于组织启用 MFA 后的用户',
+  prompt_at_sign_in_no_skip: '要求用户在下次登录时设置 MFA（不可跳过）',
 };
 
 export default Object.freeze(mfa);

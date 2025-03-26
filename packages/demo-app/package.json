@@ -1,6 +1,6 @@
 {
   "name": "@logto/demo-app",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Logto demo app.",
   "author": "Silverhand Inc. <contact@silverhand.io>",
   "license": "MPL-2.0",
@@ -20,11 +20,11 @@
     "stylelint": "stylelint \"src/**/*.scss\""
   },
   "devDependencies": {
-    "@logto/core-kit": "workspace:^2.4.0",
-    "@logto/language-kit": "workspace:^1.1.0",
-    "@logto/phrases": "workspace:^1.14.0",
-    "@logto/react": "^3.0.12",
-    "@logto/schemas": "workspace:^1.20.0",
+    "@logto/core-kit": "workspace:^2.5.4",
+    "@logto/language-kit": "workspace:^1.1.1",
+    "@logto/phrases": "workspace:^1.18.0",
+    "@logto/react": "^4.0.4",
+    "@logto/schemas": "workspace:^1.24.1",
     "@silverhand/eslint-config": "6.0.1",
     "@silverhand/eslint-config-react": "6.0.2",
     "@silverhand/ts-config": "6.0.0",
@@ -45,7 +45,7 @@
     "react-i18next": "^12.3.1",
     "stylelint": "^15.0.0",
     "typescript": "^5.5.3",
-    "vite": "^6.0.9",
+    "vite": "^6.1.2",
     "vite-plugin-compression": "^0.5.1",
     "zod": "^3.23.8"
   },

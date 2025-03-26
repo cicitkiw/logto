@@ -10,6 +10,7 @@ const description = {
   sign_in: 'Zaloguj się',
   privacy_policy: 'Polityka prywatności',
   create_account: 'Utwórz konto',
+  switch_account: 'Przełącz konto',
   or: 'lub',
   and: 'i',
   enter_passcode: 'Kod weryfikacyjny został wysłany na twoje {{address}} {{target}}',
@@ -64,9 +65,18 @@ const description = {
   password_requirements: 'Wymagania dotyczące hasła {{items, list}}.',
   password_requirement: {
     length_one: 'wymaga co najmniej {{count}} znaku',
+    length_two: 'wymaga co najmniej {{count}} znaków',
+    length_few: 'wymaga co najmniej {{count}} znaków',
+    length_many: 'wymaga co najmniej {{count}} znaków',
     length_other: 'wymaga co najmniej {{count}} znaków',
     character_types_one:
       'powinno zawierać co najmniej {{count}} rodzaj liter wielkich, małych liter, cyfr i symboli',
+    character_types_two:
+      'powinno zawierać co najmniej {{count}} rodzaje liter wielkich, małych liter, cyfr i symboli',
+    character_types_few:
+      'powinno zawierać co najmniej {{count}} rodzaje liter wielkich, małych liter, cyfr i symboli',
+    character_types_many:
+      'powinno zawierać co najmniej {{count}} rodzaje liter wielkich, małych liter, cyfr i symboli',
     character_types_other:
       'powinno zawierać co najmniej {{count}} rodzaje liter wielkich, małych liter, cyfr i symboli',
   },
@@ -75,30 +85,18 @@ const description = {
   single_sign_on_connectors_list:
     'Twoja firma włączyła jednokrotne logowanie dla konta e-mail {{email}}. Możesz kontynuować logowanie za pomocą następujących dostawców SSO.',
   single_sign_on_enabled: 'To konto ma włączone jednokrotne logowanie.',
-  /** UNTRANSLATED */
-  authorize_title: 'Authorize {{name}}',
-  /** UNTRANSLATED */
-  request_permission: '{{name}} is requesting access to:',
-  /** UNTRANSLATED */
-  grant_organization_access: 'Grant the organization access:',
-  /** UNTRANSLATED */
-  authorize_personal_data_usage: 'Authorize the use of your personal data:',
-  /** UNTRANSLATED */
-  authorize_organization_access: 'Authorize access to the specific organization:',
-  /** UNTRANSLATED */
-  user_scopes: 'Personal user data',
-  /** UNTRANSLATED */
-  organization_scopes: 'Organization access',
-  /** UNTRANSLATED */
-  authorize_agreement: `By authorizing the access, you agree to the {{name}}'s <link></link>.`,
-  /** UNTRANSLATED */
-  authorize_agreement_with_redirect: `By authorizing the access, you agree to the {{name}}'s <link></link>, and will be redirected to {{uri}}.`,
-  /** UNTRANSLATED */
-  not_you: 'Not you?',
-  /** UNTRANSLATED */
-  user_id: 'User ID: {{id}}',
-  /** UNTRANSLATED */
-  redirect_to: 'You will be redirected to {{name}}.',
+  authorize_title: '授权 {{name}}',
+  request_permission: '{{name}} 请求访问:',
+  grant_organization_access: '授予组织访问权限:',
+  authorize_personal_data_usage: '授权使用你的个人数据:',
+  authorize_organization_access: '授权访问特定组织:',
+  user_scopes: '个人用户数据',
+  organization_scopes: '组织访问',
+  authorize_agreement: `通过授权访问，你同意 {{name}} 的 <link></link>。`,
+  authorize_agreement_with_redirect: `通过授权访问，你同意 {{name}} 的 <link></link>，并将被重定向到 {{uri}}。`,
+  not_you: '不是你？',
+  user_id: '用户 ID：{{id}}',
+  redirect_to: '你将被重定向到 {{name}}。',
   auto_agreement: 'Kontynuując, zgadzasz się na <link></link>.',
   identifier_sign_in_description:
     'Wprowadź swoje {{types, list(type: disjunction;)}} aby się zalogować.',
@@ -109,6 +107,9 @@ const description = {
   back_to_sign_in: 'Wróć do logowania',
   support_email: 'Email wsparcia: <link></link>',
   support_website: 'Strona wsparcia: <link></link>',
+  switch_account_title: 'Jesteś obecnie zalogowany jako {{account}}',
+  switch_account_description:
+    'Aby kontynuować, zostaniesz wylogowany z obecnego konta i automatycznie przełączony na nowe konto.',
 };
 
 export default Object.freeze(description);
