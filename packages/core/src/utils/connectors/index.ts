@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as os from 'os';
+const platform = os.platform();
 
 import type { ConnectorFactory } from '@logto/cli/lib/connector/index.js';
 import { loadConnectorFactories as _loadConnectorFactories } from '@logto/cli/lib/connector/index.js';
@@ -96,7 +98,10 @@ export const loadConnectorFactories = async () => {
     return [];
   }
 
-  const connectorPackages = await getConnectorPackagesFromDirectory(directory);
+  let connectorPackages = await getConnectorPackagesFromDirectory(directory);
+  if (platform === 'win32') {
+    connectorPackages = connectorPackages.map((pkg) => ({...pkg, path: `file://${pkg.path.replace(/\\/g, '/')}` }))
+  }
 
   const connectorFactories = await _loadConnectorFactories(
     connectorPackages,
